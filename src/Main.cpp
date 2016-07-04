@@ -509,6 +509,14 @@ std::string ToString(bool value)
 	return value ? "1" : "0";
 }
 
+std::string ToString(uint32_t value)
+{
+	std::stringstream sstr;
+	sstr << std::setfill('0') << std::setw(6) << std::hex << value;
+
+	return sstr.str();
+}
+
 real ToReal(const std::string& str)
 {
 	return atof(str.c_str());
@@ -517,6 +525,11 @@ real ToReal(const std::string& str)
 int ToInt(const std::string& str)
 {
 	return atoi(str.c_str());
+}
+
+uint32_t ToUInt32(const std::string& str)
+{
+	return (uint32_t)strtoul(str.c_str(), NULL, 16);
 }
 
 bool ToBool(const std::string& str)

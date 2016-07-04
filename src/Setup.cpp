@@ -60,7 +60,10 @@ Setup::Setup() :
 	unitOfLength(UL_INCHES),
 	haveLaserPlaneNormals(false),
 	enableLighting(false),
+	lightingType(LT_PWM),
 	lightingPin(3),
+	lightingIlluminationRGB(0xFFFFFF),
+	lightingLaserRGB(0x222222),
 	enableAuthentication(false),
 	passwordHash("")
 {
@@ -115,7 +118,10 @@ void Setup::encodeProperties(std::vector<Property>& properties)
 	properties.push_back(Property("setup.unitOfLength", ToString((int)unitOfLength)));
 	properties.push_back(Property("setup.haveLaserPlaneNormals", ToString(haveLaserPlaneNormals)));
 	properties.push_back(Property("setup.enableLighting", ToString(enableLighting)));
+	properties.push_back(Property("setup.lightingType", ToString((int)lightingType)));
 	properties.push_back(Property("setup.lightingPin", ToString(lightingPin)));
+	properties.push_back(Property("setup.lightingIlluminationRGB", ToString(lightingIlluminationRGB)));
+	properties.push_back(Property("setup.lightingLaserRGB", ToString(lightingLaserRGB)));
 	properties.push_back(Property("setup.enableAuthentication", ToString(enableAuthentication)));
 	properties.push_back(Property("setup.passwordHash", passwordHash));
 
@@ -302,9 +308,21 @@ void Setup::decodeProperties(const std::vector<Property>& properties)
 		{
 			enableLighting = ToBool(prop.value);
 		}
+		else if (prop.name == "setup.lightingType")
+		{
+			lightingType = (LightingType) ToInt(prop.value);
+		}
 		else if (prop.name == "setup.lightingPin")
 		{
 			lightingPin = ToInt(prop.value);
+		}
+		else if (prop.name == "setup.lightingIlluminationRGB")
+		{
+			lightingIlluminationRGB = ToUInt32(prop.value);
+		}
+		else if (prop.name == "setup.lightingLaserRGB")
+		{
+			lightingLaserRGB = ToUInt32(prop.value);
 		}
 		else if (prop.name == "setup.enableAuthentication")
 		{

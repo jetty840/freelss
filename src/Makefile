@@ -5,9 +5,10 @@ CFLAGS=-O3 -Wall -Winvalid-pch -fexceptions -I/usr/local/include -I/opt/vc/inclu
 	-I/opt/vc/include/interface/vmcs_host/linux \
 	-I/opt/vc/include/interface\
 	-I/opt/vc/include/interface/mmal/util\
+	-I../../rpi_ws281x\
 	-I../contrib
 
-LFLAGS=-liw -lcurl -lmmal -lmmal_core -lmmal_util -lvcos -lpthread -lpng -ljpeg -lsqlite3 -lwiringPi -lmicrohttpd -lssl -lcrypto  -lbcm_host -L/usr/local/lib -L/opt/vc/lib
+LFLAGS=-liw -lcurl -lmmal -lmmal_core -lmmal_util -lvcos -lpthread -lpng -ljpeg -lsqlite3 -lwiringPi -lmicrohttpd -lssl -lcrypto  -lbcm_host -lws2811 -L/usr/local/lib -L/opt/vc/lib -L../../rpi_ws281x
 OBJECTS=WebContent.o PropertyReaderWriter.o Main.o \
 	HttpServer.o CriticalSection.o Scanner.o Image.o ImageProcessor.o \
 	Thread.o A4988TurnTable.o RelayLaser.o LocationMapper.o \

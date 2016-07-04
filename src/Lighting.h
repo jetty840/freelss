@@ -20,6 +20,10 @@
 
 #pragma once
 
+#define WS281X_LED_COUNT	12
+#define WS281X_DMA		5
+#define WS281X_TARGET_FREQ	800000
+#define WS281X_STRIP_TYPE	WS2811_STRIP_GRB
 
 namespace freelss
 {
@@ -42,6 +46,12 @@ public:
 	void setIntensity(int intensity);
 
 	int getIntensity() const;
+
+	// 0x00RRGGBB
+	void setRGB(uint32_t rgb);
+
+	// Count is number of pixels to set to white
+	void setCount(int count);
 private:
 	static Lighting * m_instance;
 	int m_pin;

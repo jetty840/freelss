@@ -64,7 +64,10 @@ public:
 	PixelLocation rightLaserCalibrationTop;
 	PixelLocation rightLaserCalibrationBottom;
 	bool enableLighting;
+	LightingType lightingType;
 	int lightingPin;
+	uint32_t lightingIlluminationRGB;
+	uint32_t lightingLaserRGB;
 	bool enableAuthentication;
 	std::string passwordHash;
 private:

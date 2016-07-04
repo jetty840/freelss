@@ -250,7 +250,10 @@ const std::string WebContent::PLY_DATA_FORMAT = "PLY_DATA_FORMAT";
 const std::string WebContent::FREE_DISK_SPACE = "FREE_DISK_SPACE";
 const std::string WebContent::ENABLE_BURST_MODE = "ENABLE_BURST_MODE";
 const std::string WebContent::ENABLE_LIGHTING = "ENABLE_LIGHTING";
+const std::string WebContent::LIGHTING_TYPE = "LIGHTING_TYPE";
 const std::string WebContent::LIGHTING_PIN = "LIGHTING_PIN";
+const std::string WebContent::LIGHTING_ILLUMINATION_RGB = "LIGHTING_ILLUMINATION_RGB";
+const std::string WebContent::LIGHTING_LASER_RGB = "LIGHTING_LASER_RGB";
 const std::string WebContent::CREATE_BASE_FOR_OBJECT = "CREATE_BASE_FOR_OBJECT";
 const std::string WebContent::WIFI_ESSID = "WIFI_ESSID";
 const std::string WebContent::WIFI_ESSID_HIDDEN = "WIFI_ESSID_HIDDEN";
@@ -295,7 +298,9 @@ const std::string WebContent::GROUND_PLANE_HEIGHT_DESCR = "Any scan data less th
 const std::string WebContent::PLY_DATA_FORMAT_DESCR = "Whether to generate binary or ASCII PLY files.";
 const std::string WebContent::ENABLE_BURST_MODE_DESCR = "Enables the camera's burst mode when capturing in still mode";
 const std::string WebContent::ENABLE_LIGHTING_DESCR = "Enables support for controlling a connected light.";
-const std::string WebContent::LIGHTING_PIN_DESCR = "The wiringPi pin number for the light. Change will not go into effect until system is rebooted.";
+const std::string WebContent::LIGHTING_PIN_DESCR = "For type PWM, use The wiringPi pin number for the light. For type WS281x use the GPIO number (typically 18). Change will not go into effect until system is rebooted.";
+const std::string WebContent::LIGHTING_ILLUMINATION_RGB_DESCR = "The RGB value used to illuminate the model when lasers are off during scanning, used for coloring the object.  Format RRGGBB (hex).  Only used when Lighting Type = WS281x.";
+const std::string WebContent::LIGHTING_LASER_RGB_DESCR = "The RGB value used to illuminate the model when lasers are on during scanning.  Format RRGGBB (hex).  Only used when Lighting Type = WS281x.";
 const std::string WebContent::CREATE_BASE_FOR_OBJECT_DESCR = "Adds a flat base to the object for easier 3D printing preparation.";
 const std::string WebContent::WIFI_ESSID_DESCR = "The wireless network to configure";
 const std::string WebContent::WIFI_PASSWORD_DESCR = "The password for the wireless network";
@@ -875,7 +880,21 @@ std::string WebContent::setup(const std::string& message)
 	sstr << setting(WebContent::DIRECTION_PIN, "Motor Direction Pin", setup->motorDirPin, DIRECTION_PIN_DESCR);
 	sstr << setting(WebContent::RESPONSE_DELAY, "Motor Response Delay", setup->motorResponseDelay, RESPONSE_DELAY_DESCR, "&mu;s");
 	sstr << checkbox(WebContent::ENABLE_LIGHTING, "Enable Lighting", setup->enableLighting, ENABLE_LIGHTING_DESCR);
+
+	std::string pwmSel = setup->lightingType == LT_PWM ? " SELECTED" : "";
+	std::string ws281xSel = setup->lightingType == LT_WS281X ? " SELECTED" : "";
+
+	sstr << "<div><div class=\"settingsText\">Lighting Type</div>";
+	sstr << "<select name=\"" << WebContent::LIGHTING_TYPE << "\">";
+	sstr << "<option value=\"1\"" << pwmSel << ">PWM</option>\r\n";
+	sstr << "<option value=\"2\"" << ws281xSel << ">WS281x</option>\r\n";
+	sstr << "</select></div>";
+	sstr << "<div class=\"settingsDescr\">The type of lighting installed.  WS281x is also known as Neopixel.</div>\n";
+
 	sstr << setting(WebContent::LIGHTING_PIN, "Lighting Pin", setup->lightingPin, LIGHTING_PIN_DESCR);
+	sstr << setting(WebContent::LIGHTING_ILLUMINATION_RGB, "Lighting Illumination RGB", setup->lightingIlluminationRGB, LIGHTING_ILLUMINATION_RGB_DESCR);
+	sstr << setting(WebContent::LIGHTING_LASER_RGB, "Lighting Laser RGB", setup->lightingLaserRGB, LIGHTING_LASER_RGB_DESCR);
+
 	sstr << setting(WebContent::VERSION_NAME, "Firmware Version", FREELSS_VERSION_NAME, "The version of FreeLSS the scanner is running", "", true);
 	sstr << setting(WebContent::FREE_DISK_SPACE, "Free Space", freeSpaceMb, "The amount of free disk space available", "MB", true);
 	sstr << setting(WebContent::KERNEL_VERSION, "Kernel", kernelVersion.str(), "The version of the kernel", "", true);
@@ -1110,6 +1129,13 @@ std::string WebContent::setting(const std::string& name, const std::string& labe
 	std::stringstream sstr;
 	sstr << value;
 	return setting(name, label, sstr.str(), description, units, readOnly);
+}
+
+std::string WebContent::setting(const std::string& name, const std::string& label,
+		uint32_t value, const std::string& description, const std::string& units, bool readOnly)
+{
+	std::string str = ToString(value);
+	return setting(name, label, str, description, units, readOnly);
 }
 
 std::string WebContent::setting(const std::string& name, const std::string& label,

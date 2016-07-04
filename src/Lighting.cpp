@@ -21,10 +21,46 @@
 #include "Lighting.h"
 #include "Setup.h"
 #include <softPwm.h>
+#include <ws2811.h>
+
+#define WS281X_LED_COUNT        12
+#define WS281X_DMA              5
+#define WS281X_TARGET_FREQ      800000
+#define WS281X_STRIP_TYPE       WS2811_STRIP_GRB
 
 namespace freelss
 {
 Lighting * Lighting::m_instance = NULL;
+
+ws2811_t ledstring =
+{
+    .device = NULL,
+    .rpi_hw = NULL,
+    .freq = 0,
+    .dmanum = 0,
+    .channel =
+    {
+        [0] =
+        {
+            .gpionum = 0,
+            .invert = 0,
+            .count = 0,
+            .brightness = 255,
+            .strip_type = 0,
+	    .leds = NULL,
+        },
+        [1] =
+        {
+            .gpionum = 0,
+            .invert = 0,
+            .count = 0,
+            .brightness = 0,
+	    .strip_type = 0,
+	    .leds = NULL,
+        },
+    },
+};
+
 
 Lighting * Lighting::get()
 {
@@ -49,16 +85,32 @@ Lighting::Lighting() :
 	Setup * setup = Setup::get();
 	m_pin = setup->lightingPin;
 
-	if (setup->enableLighting)
+	if (setup->enableLighting )
 	{
-		softPwmCreate(m_pin, m_intensity, 100);
+		if ( setup->lightingType == LT_PWM )
+			softPwmCreate(m_pin, m_intensity, 100);
+		if ( setup->lightingType == LT_WS281X )
+		{
+			// Setup the Neopixels and set to black
+			ledstring.freq = WS281X_TARGET_FREQ;
+			ledstring.dmanum = WS281X_DMA;
+			ledstring.channel[0].gpionum = m_pin;
+			ledstring.channel[0].count = WS281X_LED_COUNT;
+			ledstring.channel[0].strip_type = WS281X_STRIP_TYPE;
+
+			if ( ! ws2811_init(&ledstring) )
+				std::cerr << "Error ws2811_init failed" << std::endl;
+			setRGB(0);
+		}
 	}
 }
 
 
 void Lighting::setIntensity(int intensity)
 {
-	if (intensity >= 0 && intensity <= 100)
+	Setup *setup = Setup::get();
+
+	if (setup->enableLighting && setup->lightingType == LT_PWM && intensity >= 0 && intensity <= 100)
 	{
 		softPwmWrite (m_pin, intensity);
 		m_intensity = intensity;
@@ -68,6 +120,42 @@ void Lighting::setIntensity(int intensity)
 int Lighting::getIntensity() const
 {
 	return m_intensity;
+}
+
+
+static void setRGBLed(uint32_t rgb, int led)
+{
+	ledstring.channel[0].leds[led] = rgb;
+}
+
+
+// 0x00RRGGBB
+void Lighting::setRGB(uint32_t rgb)
+{
+	Setup *setup = Setup::get();
+
+	if ( setup->enableLighting && setup->lightingType == LT_WS281X )
+	{
+		for (int i = 0; i < WS281X_LED_COUNT; i ++ )
+			setRGBLed(rgb, i);
+		ws2811_render(&ledstring);
+		ws2811_wait(&ledstring);
+	}
+}
+
+
+// Count is number of pixels to set to white
+void Lighting::setCount(int count)
+{
+	Setup *setup = Setup::get();
+
+	if ( setup->enableLighting && setup->lightingType == LT_WS281X )
+	{
+		for (int i = 0; i < WS281X_LED_COUNT; i ++)
+			setRGBLed((i < count) ? 0x00FFFFFF : 0, i);
+		ws2811_render(&ledstring);
+		ws2811_wait(&ledstring);
+	}
 }
 
 }

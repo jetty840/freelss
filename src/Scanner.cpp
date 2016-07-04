@@ -34,6 +34,7 @@
 #include "Facetizer.h"
 #include "PropertyReaderWriter.h"
 #include "ObjectBaseCreator.h"
+#include "Lighting.h"
 
 namespace freelss
 {
@@ -898,6 +899,8 @@ void Scanner::mergeDebuggingImages(Image& outImage, Image& leftDebuggingImage, I
 void Scanner::singleScan(int frame, float rotation, float frameRotation,
 		                 LocationMapper& leftLocMapper, LocationMapper& rightLocMapper, TimingStats * timingStats)
 {
+	Setup * setup = Setup::get();
+	Lighting *lighting = Lighting::get();
 	double time1 = GetTimeInSeconds();
 	m_turnTable->rotate(frameRotation);
 	timingStats->rotationTime += GetTimeInSeconds() - time1;
@@ -912,6 +915,7 @@ void Scanner::singleScan(int frame, float rotation, float frameRotation,
 	try
 	{
 		// Take a picture with the laser off
+		lighting->setRGB(setup->lightingIlluminationRGB);
 		time1 = GetTimeInSeconds();
 		image1 = acquireImage();
 		timingStats->imageAcquisitionTime += GetTimeInSeconds() - time1;
@@ -935,6 +939,7 @@ void Scanner::singleScan(int frame, float rotation, float frameRotation,
 			timingStats->laserTime += GetTimeInSeconds() - time1;
 
 			// Take a picture with the right laser on
+			lighting->setRGB(setup->lightingLaserRGB);
 			time1 = GetTimeInSeconds();
 			image2 = acquireImage();
 			timingStats->imageAcquisitionTime += GetTimeInSeconds() - time1;
@@ -971,6 +976,7 @@ void Scanner::singleScan(int frame, float rotation, float frameRotation,
 			timingStats->laserTime += GetTimeInSeconds() - time1;
 
 			// Take a picture with the left laser on
+			lighting->setRGB(setup->lightingLaserRGB);
 			time1 = GetTimeInSeconds();
 			image2 = acquireImage();
 			timingStats->imageAcquisitionTime += GetTimeInSeconds() - time1;
@@ -986,6 +992,7 @@ void Scanner::singleScan(int frame, float rotation, float frameRotation,
 
 			releaseImage(image2);
 		}
+		lighting->setRGB(0);
 
 		// Release image 1 back to the camera
 		releaseImage(image1);

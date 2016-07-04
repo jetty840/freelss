@@ -375,6 +375,20 @@ static std::string SaveAuthenticationSettings(RequestInfo * reqInfo)
 	return message;
 }
 
+
+
+static bool is_hex_string(std::string& str)
+{
+	for ( size_t i = 0; i < str.length(); i ++ )
+	{
+		if ( ! isxdigit(str[i]) )	return 0;
+	}
+
+	return 1;
+}
+
+
+
 static void SaveSetup(RequestInfo * reqInfo)
 {
 	Setup * setup = Setup::get();
@@ -514,16 +528,45 @@ static void SaveSetup(RequestInfo * reqInfo)
 
 	setup->enableLighting = !reqInfo->arguments[WebContent::ENABLE_LIGHTING].empty();
 
+	std::string lightingType = reqInfo->arguments[WebContent::LIGHTING_TYPE];
+	if (!lightingType.empty())
+	{
+		setup->lightingType = (LightingType) ToInt(lightingType);
+	}
+
 	std::string lightingPin = reqInfo->arguments[WebContent::LIGHTING_PIN];
 	if (!lightingPin.empty())
 	{
 		int pin = ToInt(lightingPin);
-		if (pin > MAX_PIN)
+		if  ( ((setup->lightingType == LT_PWM ) && (pin > MAX_PIN)) ||
+		      ((setup->lightingType == LT_WS281X ) && ( pin != 18 && pin != 12 )) )
 		{
 			throw Exception("Invalid Lighting Pin Setting");
 		}
 
 		setup->lightingPin = pin;
+	}
+
+	std::string lightingIlluminationRGB = reqInfo->arguments[WebContent::LIGHTING_ILLUMINATION_RGB];
+	if (!lightingIlluminationRGB.empty())
+	{
+		if ( lightingIlluminationRGB.length() != 6 || !is_hex_string(lightingIlluminationRGB) )
+		{
+			throw Exception("Invalid Lighting Illumination RGB Setting");
+		}
+
+		setup->lightingIlluminationRGB = ToUInt32(lightingIlluminationRGB);
+	}
+
+	std::string lightingLaserRGB = reqInfo->arguments[WebContent::LIGHTING_LASER_RGB];
+	if (!lightingLaserRGB.empty())
+	{
+		if ( lightingLaserRGB.length() != 6 || !is_hex_string(lightingLaserRGB) )
+		{
+			throw Exception("Invalid Lighting Laser RGB Setting");
+		}
+
+		setup->lightingLaserRGB = ToUInt32(lightingLaserRGB);
 	}
 
 	// Save the properties

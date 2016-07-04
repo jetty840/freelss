@@ -289,6 +289,9 @@ struct SoftwareUpdate
 /** Units of length */
 enum UnitOfLength { UL_UNKNOWN, UL_MILLIMETERS, UL_INCHES, UL_CENTIMETERS };
 
+/** Lighting Types */
+enum LightingType { LT_UNKNOWN, LT_PWM, LT_WS281X };
+
 /** Returns the current point in time in ms */
 double GetTimeInSeconds();
 
@@ -300,9 +303,11 @@ std::string ToString(UnitOfLength unit);
 std::string ToString(real value);
 std::string ToString(int value);
 std::string ToString(bool value);
+std::string ToString(uint32_t value);
 std::string ToHexString(unsigned char * data, size_t dataLength);
 real ToReal(const std::string& str);
 int ToInt(const std::string& str);
+uint32_t ToUInt32(const std::string& str);
 bool ToBool(const std::string& str);
 bool EndsWith(const std::string& str, const std::string& ending);
 void HtmlEncode(std::string& data);

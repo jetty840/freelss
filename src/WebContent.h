@@ -88,7 +88,10 @@ public:
 	static const std::string FREE_DISK_SPACE;
 	static const std::string ENABLE_BURST_MODE;
 	static const std::string ENABLE_LIGHTING;
+	static const std::string LIGHTING_TYPE;
 	static const std::string LIGHTING_PIN;
+	static const std::string LIGHTING_ILLUMINATION_RGB;
+	static const std::string LIGHTING_LASER_RGB;
 	static const std::string CREATE_BASE_FOR_OBJECT;
 	static const std::string WIFI_ESSID;
 	static const std::string WIFI_ESSID_HIDDEN;
@@ -106,6 +109,9 @@ private:
 
 	static std::string setting(const std::string& name, const std::string& label,
 			int value, const std::string& description, const std::string& units = "", bool readOnly = false);
+
+	static std::string setting(const std::string& name, const std::string& label,
+			uint32_t value, const std::string& description, const std::string& units = "", bool readOnly = false);
 
 	static std::string setting(const std::string& name, const std::string& label,
 			real value, const std::string& description, const std::string& units = "", bool readOnly = false);
@@ -151,6 +157,8 @@ private:
 	static const std::string ENABLE_BURST_MODE_DESCR;
 	static const std::string ENABLE_LIGHTING_DESCR;
 	static const std::string LIGHTING_PIN_DESCR;
+	static const std::string LIGHTING_ILLUMINATION_RGB_DESCR;
+	static const std::string LIGHTING_LASER_RGB_DESCR;
 	static const std::string CREATE_BASE_FOR_OBJECT_DESCR;
 	static const std::string WIFI_ESSID_DESCR;
 	static const std::string WIFI_PASSWORD_DESCR;
