@@ -98,10 +98,10 @@ Lighting::Lighting() :
 			ledstring.channel[0].count = WS281X_LED_COUNT;
 			ledstring.channel[0].strip_type = WS281X_STRIP_TYPE;
 
-			if ( ! ws2811_init(&ledstring) )
+			if ( ws2811_init(&ledstring) )
 				std::cerr << "Error ws2811_init failed" << std::endl;
-			setRGB(0);
 		}
+		setPreset(LP_OFF);
 	}
 }
 
@@ -134,13 +134,47 @@ void Lighting::setRGB(uint32_t rgb)
 {
 	Setup *setup = Setup::get();
 
-	if ( setup->enableLighting && setup->lightingType == LT_WS281X )
+	if ( setup->enableLighting )
 	{
-		for (int i = 0; i < WS281X_LED_COUNT; i ++ )
-			setRGBLed(rgb, i);
-		ws2811_render(&ledstring);
-		ws2811_wait(&ledstring);
+		if ( setup->lightingType == LT_WS281X )
+		{
+			for (int i = 0; i < WS281X_LED_COUNT; i ++ )
+				setRGBLed(rgb, i);
+			ws2811_render(&ledstring);
+			ws2811_wait(&ledstring);
+		}
+
+		if ( setup->lightingType == LT_PWM )
+		{
+			int intensity = (int)(((float)(rgb & 0xFF)/255.0) * 100.0);
+			setIntensity(intensity);
+		}
 	}
+}
+
+
+
+void Lighting::setPreset(enum LightingPreset preset)
+{
+	Setup *setup = Setup::get();
+
+	switch (preset)
+	{
+		case LP_OFF:
+			setRGB(0);
+			break;
+
+		case LP_MODEL:
+			setRGB(setup->lightingIlluminationRGB);
+			break;
+
+		case LP_LASER:
+			setRGB(setup->lightingLaserRGB);
+			break;
+
+		default:
+			break;
+	}	
 }
 
 
@@ -149,12 +183,26 @@ void Lighting::setCount(int count)
 {
 	Setup *setup = Setup::get();
 
-	if ( setup->enableLighting && setup->lightingType == LT_WS281X )
+	if ( setup->enableLighting )
 	{
-		for (int i = 0; i < WS281X_LED_COUNT; i ++)
-			setRGBLed((i < count) ? 0x00FFFFFF : 0, i);
-		ws2811_render(&ledstring);
-		ws2811_wait(&ledstring);
+		if ( setup->lightingType == LT_WS281X )
+		{
+			for (int i = 0; i < WS281X_LED_COUNT; i ++)
+				setRGBLed((i < count) ? 0x00FFFFFF : 0, i);
+			ws2811_render(&ledstring);
+			ws2811_wait(&ledstring);
+		}
+		if ( setup->lightingType == LT_PWM )
+		{
+			for (int i = 0; i < count; i ++ )
+			{
+				setIntensity(100);
+				sleep(1);
+				setIntensity(0);
+				sleep(1);
+			}
+			sleep(3);
+		}
 	}
 }
 

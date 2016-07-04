@@ -618,6 +618,7 @@ void Scanner::runScan()
 void Scanner::generateDebugInfo(Laser::LaserSide laserSide)
 {
 	Setup * setup = Setup::get();
+	Lighting *lighting = Lighting::get();
 
 	// Prepare for scanning
 	prepareScan();
@@ -637,8 +638,13 @@ void Scanner::generateDebugInfo(Laser::LaserSide laserSide)
 	// Ensure that the camera images get released
 	Image * image1 = NULL;
 	Image * image2 = NULL;
+	Image * imageModel = NULL;
 	try
 	{
+		lighting->setPreset(Lighting::LP_MODEL);
+		imageModel = acquireImage();
+
+		lighting->setPreset(Lighting::LP_LASER);
 		image1 = acquireImage();
 
 		Image rightDebuggingImage;
@@ -686,7 +692,7 @@ void Scanner::generateDebugInfo(Laser::LaserSide laserSide)
 				locMapper.setLaserPlaneNormal(setup->rightLaserPlaneNormal);
 			}
 
-			locMapper.mapPoints(&rightLocations.front(), image1, m_columnPoints, numRightLocations, numLocationsMapped);
+			locMapper.mapPoints(&rightLocations.front(), imageModel, m_columnPoints, numRightLocations, numLocationsMapped);
 			numRightLocations = numLocationsMapped;
 		}
 
@@ -733,11 +739,13 @@ void Scanner::generateDebugInfo(Laser::LaserSide laserSide)
 				locMapper.setLaserPlaneNormal(setup->leftLaserPlaneNormal);
 			}
 
-			locMapper.mapPoints(&leftLocations.front(), image1, m_columnPoints, numLeftLocations, numLocationsMapped);
+			locMapper.mapPoints(&leftLocations.front(), imageModel, m_columnPoints, numLeftLocations, numLocationsMapped);
 			numLeftLocations = numLocationsMapped;
 		}
+		lighting->setPreset(Lighting::LP_OFF);
 
 		releaseImage(image1);
+		releaseImage(imageModel);
 
 		//
 		// Merge the two debugging images
@@ -810,6 +818,7 @@ void Scanner::generateDebugInfo(Laser::LaserSide laserSide)
 	{
 		releaseImage(image1);
 		releaseImage(image2);
+		releaseImage(imageModel);
 		throw;
 	}
 
@@ -899,7 +908,6 @@ void Scanner::mergeDebuggingImages(Image& outImage, Image& leftDebuggingImage, I
 void Scanner::singleScan(int frame, float rotation, float frameRotation,
 		                 LocationMapper& leftLocMapper, LocationMapper& rightLocMapper, TimingStats * timingStats)
 {
-	Setup * setup = Setup::get();
 	Lighting *lighting = Lighting::get();
 	double time1 = GetTimeInSeconds();
 	m_turnTable->rotate(frameRotation);
@@ -907,6 +915,7 @@ void Scanner::singleScan(int frame, float rotation, float frameRotation,
 
 	Image * image1 = NULL;
 	Image * image2 = NULL;
+	Image * imageModel = NULL;
 
 	bool useLeftLaser = m_laserSelection == Laser::LEFT_LASER || m_laserSelection == Laser::ALL_LASERS;
 	bool useRightLaser = m_laserSelection == Laser::RIGHT_LASER || m_laserSelection == Laser::ALL_LASERS;
@@ -914,10 +923,10 @@ void Scanner::singleScan(int frame, float rotation, float frameRotation,
 	// Ensure that the images get released back to the camera
 	try
 	{
-		// Take a picture with the laser off
-		lighting->setRGB(setup->lightingIlluminationRGB);
+		// Take a picture under model illumination, we use this for the thumbnail and coloring the model
+		lighting->setPreset(Lighting::LP_MODEL);
 		time1 = GetTimeInSeconds();
-		image1 = acquireImage();
+		imageModel = acquireImage();
 		timingStats->imageAcquisitionTime += GetTimeInSeconds() - time1;
 
 		// If this is the first image, save it as a thumbnail
@@ -926,8 +935,15 @@ void Scanner::singleScan(int frame, float rotation, float frameRotation,
 			std::string thumbnail = m_filename + ".png";
 
 			PixelLocationWriter imageWriter;
-			imageWriter.writeImage(* image1, 128, 96, thumbnail.c_str());
+			imageWriter.writeImage(* imageModel, 128, 96, thumbnail.c_str());
 		}
+
+		// Take a picture with the laser off
+		// This is used so the laser can compare the differences between laser on and laser off
+		lighting->setPreset(Lighting::LP_LASER);
+		time1 = GetTimeInSeconds();
+		image1 = acquireImage();
+		timingStats->imageAcquisitionTime += GetTimeInSeconds() - time1;
 
 		// Scan with the Right laser
 		if (useRightLaser)
@@ -939,7 +955,6 @@ void Scanner::singleScan(int frame, float rotation, float frameRotation,
 			timingStats->laserTime += GetTimeInSeconds() - time1;
 
 			// Take a picture with the right laser on
-			lighting->setRGB(setup->lightingLaserRGB);
 			time1 = GetTimeInSeconds();
 			image2 = acquireImage();
 			timingStats->imageAcquisitionTime += GetTimeInSeconds() - time1;
@@ -958,7 +973,7 @@ void Scanner::singleScan(int frame, float rotation, float frameRotation,
 			timingStats->laserTime += GetTimeInSeconds() - time1;
 
 			// Process the right laser results
-			processScan(image1, image2, m_rightLaserResults, frame, rotation, rightLocMapper, Laser::RIGHT_LASER, m_firstRowRightLaserCol, timingStats);
+			processScan(image1, image2, imageModel, m_rightLaserResults, frame, rotation, rightLocMapper, Laser::RIGHT_LASER, m_firstRowRightLaserCol, timingStats);
 
 			releaseImage(image2);
 		}
@@ -976,7 +991,6 @@ void Scanner::singleScan(int frame, float rotation, float frameRotation,
 			timingStats->laserTime += GetTimeInSeconds() - time1;
 
 			// Take a picture with the left laser on
-			lighting->setRGB(setup->lightingLaserRGB);
 			time1 = GetTimeInSeconds();
 			image2 = acquireImage();
 			timingStats->imageAcquisitionTime += GetTimeInSeconds() - time1;
@@ -988,24 +1002,28 @@ void Scanner::singleScan(int frame, float rotation, float frameRotation,
 			timingStats->laserTime += GetTimeInSeconds() - time1;
 
 			// Process the left laser results
-			processScan(image1, image2, m_leftLaserResults, frame, rotation, leftLocMapper, Laser::LEFT_LASER, m_firstRowLeftLaserCol, timingStats);
+			processScan(image1, image2, imageModel, m_leftLaserResults, frame, rotation, leftLocMapper, Laser::LEFT_LASER, m_firstRowLeftLaserCol, timingStats);
 
 			releaseImage(image2);
 		}
-		lighting->setRGB(0);
+		lighting->setPreset(Lighting::LP_OFF);
 
 		// Release image 1 back to the camera
 		releaseImage(image1);
+
+		// Release imageModel back to the camera
+		releaseImage(imageModel);
 	}
 	catch (...)
 	{
 		releaseImage(image1);
 		releaseImage(image2);
+		releaseImage(imageModel);
 		throw;
 	}
 }
 
-bool Scanner::processScan(Image * image1, Image * image2, std::vector<DataPoint> & results, int frame, float rotation, LocationMapper& locMapper, Laser::LaserSide laserSide, int & firstRowLaserCol, TimingStats * timingStats)
+bool Scanner::processScan(Image * image1, Image * image2, Image * imageModel, std::vector<DataPoint> & results, int frame, float rotation, LocationMapper& locMapper, Laser::LaserSide laserSide, int & firstRowLaserCol, TimingStats * timingStats)
 {
 	int numLocationsMapped = 0;
 	int numRowsBadFromColor = 0;
@@ -1045,7 +1063,7 @@ bool Scanner::processScan(Image * image1, Image * image2, std::vector<DataPoint>
 	if (numLocations > 0)
 	{
 		time1 = GetTimeInSeconds();
-		locMapper.mapPoints(m_laserLocations, image1, m_columnPoints, numLocations, numLocationsMapped);
+		locMapper.mapPoints(m_laserLocations, imageModel, m_columnPoints, numLocations, numLocationsMapped);
 		timingStats->pointMappingTime += GetTimeInSeconds() - time1;
 
 		if (numLocations != numLocationsMapped)

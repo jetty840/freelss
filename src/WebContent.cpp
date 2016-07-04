@@ -299,8 +299,8 @@ const std::string WebContent::PLY_DATA_FORMAT_DESCR = "Whether to generate binar
 const std::string WebContent::ENABLE_BURST_MODE_DESCR = "Enables the camera's burst mode when capturing in still mode";
 const std::string WebContent::ENABLE_LIGHTING_DESCR = "Enables support for controlling a connected light.";
 const std::string WebContent::LIGHTING_PIN_DESCR = "For type PWM, use The wiringPi pin number for the light. For type WS281x use the GPIO number (typically 18). Change will not go into effect until system is rebooted.";
-const std::string WebContent::LIGHTING_ILLUMINATION_RGB_DESCR = "The RGB value used to illuminate the model when lasers are off during scanning, used for coloring the object.  Format RRGGBB (hex).  Only used when Lighting Type = WS281x.";
-const std::string WebContent::LIGHTING_LASER_RGB_DESCR = "The RGB value used to illuminate the model when lasers are on during scanning.  Format RRGGBB (hex).  Only used when Lighting Type = WS281x.";
+const std::string WebContent::LIGHTING_ILLUMINATION_RGB_DESCR = "The RGB value used to illuminate the model when lasers are off during scanning, used for coloring the object.  Format RRGGBB (hex).  For type PWM; RR, GG and BB should be the same are represent intensity.";
+const std::string WebContent::LIGHTING_LASER_RGB_DESCR = "The RGB value used to illuminate the model when lasers are on during scanning.  Format RRGGBB (hex).  For type PWM; RR, GG and BB should be the same are represent intensity.";
 const std::string WebContent::CREATE_BASE_FOR_OBJECT_DESCR = "Adds a flat base to the object for easier 3D printing preparation.";
 const std::string WebContent::WIFI_ESSID_DESCR = "The wireless network to configure";
 const std::string WebContent::WIFI_PASSWORD_DESCR = "The password for the wireless network";
@@ -554,7 +554,6 @@ std::string WebContent::viewScan(const std::string& plyFilename)
 std::string WebContent::cal1(const std::string& inMessage)
 {
 	std::string message = inMessage.empty() ? std::string("") : ("<h2>" + inMessage + "</h2>");
-	Setup * setup = Setup::get();
 
 	std::stringstream sstr;
 	sstr << "<!DOCTYPE html><html><head>"
@@ -584,19 +583,6 @@ std::string WebContent::cal1(const std::string& inMessage)
         <form action=\"/cal1\" method=\"POST\" enctype=\"application/x-www-form-urlencoded\"><input name=\"cmd\" value=\"calibrateLasers\" type=\"hidden\"><input class=\"controlSubmit\" value=\"Calibrate Lasers\" type=\"submit\"></form>\
         <div class=\"calDescr\">Line the front wall of the calibration item over the center of the turntable hole and click this button to calibrate the lasers.</div>\
     </div>";
-
-	if (setup->enableLighting)
-	{
-		sstr << "\
-		<div>\
-		<form action=\"/cal1\" method=\"POST\" enctype=\"application/x-www-form-urlencoded\">\
-		<input name=\"cmd\" value=\"setLightIntensity\" type=\"hidden\">\
-		<input name=\"intensity\" style=\"width: 75px\" class=\"settingsInput\" value=\"" << Lighting::get()->getIntensity() << "\" type=\"text\">\
-		<input class=\"submit\" style=\"width: 110px\" value=\"Set Light\" type=\"submit\">\
-		</form>\
-		</div>\
-		<div class=\"calDescr\">Sets the lighting intensity - 0 (off) to 100 (full).</div>";
-	}
 
 	sstr << "\
 	<form action=\"/cal1\" method=\"POST\" enctype=\"application/x-www-form-urlencoded\"><input name=\"cmd\" value=\"toggleLeftLaser\" type=\"hidden\"><input class=\"controlSubmit\" value=\"Toggle Left Laser\" type=\"submit\"></form>\

@@ -27,11 +27,11 @@
 #define MMAL_CAMERA_VIDEO_PORT   1
 #define MMAL_CAMERA_CAPTURE_PORT 2
 #define MMAL_VIDEO_SENSOR_MODE   2    // no-binning mode: https://www.raspberrypi.org/documentation/raspbian/applications/camera.md
-#define VIDEO_OUTPUT_BUFFERS_NUM 3
+#define VIDEO_OUTPUT_BUFFERS_NUM 4
 
 #define FULL_RES_VIDEO_FRAME_RATE_DEN 1
 
-#define NUM_IMAGE_BUFFERS 3 // The number of images available for acquisition before calling release
+#define NUM_IMAGE_BUFFERS 4 // The number of images available for acquisition before calling release
 
 #define MMAL_CHECK(cmd) {\
 	int status = cmd;\

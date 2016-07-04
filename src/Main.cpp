@@ -534,7 +534,7 @@ uint32_t ToUInt32(const std::string& str)
 
 bool ToBool(const std::string& str)
 {
-	return str == "1" || str == "true";
+	return str == "1" || str == "true" || str == "on";
 }
 
 bool EndsWith(const std::string& str, const std::string& ending)

@@ -26,6 +26,7 @@
 #include "ImageProcessor.h"
 #include "Setup.h"
 #include "LocationMapper.h"
+#include "Lighting.h"
 
 namespace freelss
 {
@@ -70,6 +71,7 @@ void Calibrator::calculateLaserPlane(Plane& outPlane, PixelLocation& outTop, Pix
 	int numLocations = 0;
 	const double acquisitionDelay = 1.0;
 	std::vector<PixelLocation> pixelLocations(maxNumLocations);
+        Lighting *lighting = Lighting::get();
 
 	// Turn the lasers off and take a picture
 	laser->turnOff(Laser::ALL_LASERS);
@@ -81,6 +83,7 @@ void Calibrator::calculateLaserPlane(Plane& outPlane, PixelLocation& outTop, Pix
 	try
 	{
 		// Take picture with laser off
+		lighting->setPreset(Lighting::LP_LASER);
 		image1 = camera->acquireImage();
 
 		// Take a picture with this laser on
@@ -91,6 +94,7 @@ void Calibrator::calculateLaserPlane(Plane& outPlane, PixelLocation& outTop, Pix
 
 		// Turn the laser back off
 		laser->turnOff(side);
+		lighting->setPreset(Lighting::LP_OFF);
 		camera->setAcquisitionDelay(acquisitionDelay);
 
 		// Run image processing
@@ -238,6 +242,8 @@ bool Calibrator::detectLaserX(real * laserX, PixelLocation& topLocation, PixelLo
 	bool detected = false;
 	PixelLocation * laserLocations = NULL;
 
+        Lighting *lighting = Lighting::get();
+
 	// Turn the lasers off and take a picture
 	laser->turnOff(Laser::ALL_LASERS);
 	Image * baseImage = NULL;
@@ -245,6 +251,7 @@ bool Calibrator::detectLaserX(real * laserX, PixelLocation& topLocation, PixelLo
 
 	try
 	{
+		lighting->setPreset(Lighting::LP_LASER);
 		baseImage = camera->acquireImage();
 
 		// Take a picture with this laser on
@@ -254,6 +261,7 @@ bool Calibrator::detectLaserX(real * laserX, PixelLocation& topLocation, PixelLo
 
 		// Turn the laser back off
 		laser->turnOff(side);
+		lighting->setPreset(Lighting::LP_OFF);
 
 		//
 		// Detect the laser from the image pixels

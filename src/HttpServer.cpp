@@ -526,7 +526,13 @@ static void SaveSetup(RequestInfo * reqInfo)
 		setup->serialNumber = serialNumber;
 	}
 
-	setup->enableLighting = !reqInfo->arguments[WebContent::ENABLE_LIGHTING].empty();
+	std::string lightingEnable = reqInfo->arguments[WebContent::ENABLE_LIGHTING];
+	if (!lightingEnable.empty())
+	{
+		std::cout << "Set Lighting Enable: " << lightingEnable << std::endl;
+		setup->enableLighting = ToBool(lightingEnable);
+		std::cout << "Set Lighting Enable: " << setup->enableLighting << std::endl;
+	}
 
 	std::string lightingType = reqInfo->arguments[WebContent::LIGHTING_TYPE];
 	if (!lightingType.empty())
@@ -985,9 +991,16 @@ static int ProcessPageRequest(RequestInfo * reqInfo)
 			unsigned imageSize = 0;
 			Camera * camera = Camera::getInstance();
 			Image * image = NULL;
+			Lighting *lighting = Lighting::get();
+			Laser * laser = Laser::getInstance();
 
 			try
 			{
+				if ( laser->isOn(Laser::LEFT_LASER) || laser->isOn(Laser::RIGHT_LASER) )
+					lighting->setPreset(Lighting::LP_LASER);
+				else
+					lighting->setPreset(Lighting::LP_MODEL);
+
 				image = camera->acquireImage();
 				if (image == NULL)
 				{
@@ -1057,6 +1070,8 @@ static int ProcessPageRequest(RequestInfo * reqInfo)
 			else if (reqInfo->method == RequestInfo::POST && cmd == "shutdown")
 			{
 				// Turn on both lasers
+				Lighting *lighting = Lighting::get();
+				lighting->setPreset(Lighting::LP_MODEL);
 				Laser::getInstance()->turnOn(Laser::ALL_LASERS);
 
 				system("shutdown -h now&");
@@ -1186,12 +1201,6 @@ static int ProcessPageRequest(RequestInfo * reqInfo)
 			else if (reqInfo->method == RequestInfo::POST && cmd == "calibrateLasers")
 			{
 				message = AutocorrectLaserMisalignment(reqInfo);
-			}
-			else if (reqInfo->method == RequestInfo::POST && cmd == "setLightIntensity")
-			{
-				std::string intensityStr = reqInfo->arguments["intensity"];
-				Lighting::get()->setIntensity(ToInt(intensityStr));
-				message = "Set light intensity to " + intensityStr + ".";
 			}
 
 			if (!responded)

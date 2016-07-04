@@ -126,7 +126,7 @@ private:
 	/**
 	 * Returns true if the scan was processed successfully and false if there was a problem and the frame needs to be again.
 	 */
-	bool processScan(Image * image1, Image * image2, std::vector<DataPoint> & results, int frame, float rotation, LocationMapper& locMapper, Laser::LaserSide laserSide, int & firstRowLaserCol, TimingStats * timingStats);
+	bool processScan(Image * image1, Image * image2, Image * imageModel, std::vector<DataPoint> & results, int frame, float rotation, LocationMapper& locMapper, Laser::LaserSide laserSide, int & firstRowLaserCol, TimingStats * timingStats);
 
 	void writeRangePoints(ColoredPoint * points, int numLocationsMapped,Laser::LaserSide laserSide);
 

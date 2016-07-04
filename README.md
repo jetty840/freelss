@@ -11,7 +11,9 @@ This fork adds Neopixel ring support to freelss.  It includes the circuit/board 
 
 The advantage of the Neopixel ring is adjustable color and brightness for illumination of the object and reporting of the ip address at startup (useful in DHCP configs).
 
-If you are not usng Neopixels, you can still use the board and omit a few components if you require a small form factor.
+If you are not usng Neopixels, you can still use the board and omit a few components if you require a small form factor, or use a different board.
+
+Additionally, custom PWM (White) lighting can be setup such that the model and lasers can have different ambient lighting.
 
 
 

@@ -34,6 +34,8 @@ namespace freelss
 class Lighting
 {
 public:
+	enum LightingPreset { LP_OFF, LP_MODEL, LP_LASER};
+
 	/** Returns the singleton instance */
 	static Lighting * get();
 
@@ -42,13 +44,11 @@ public:
 
 	Lighting();
 
-	/** 0 (off) to 100 (full intensity) */
-	void setIntensity(int intensity);
-
-	int getIntensity() const;
 
 	// 0x00RRGGBB
 	void setRGB(uint32_t rgb);
+
+	void setPreset(enum LightingPreset preset);
 
 	// Count is number of pixels to set to white
 	void setCount(int count);
@@ -56,6 +56,11 @@ private:
 	static Lighting * m_instance;
 	int m_pin;
 	int m_intensity;
+
+	/** 0 (off) to 100 (full intensity) */
+	void setIntensity(int intensity);
+
+	int getIntensity() const;
 };
 
 }

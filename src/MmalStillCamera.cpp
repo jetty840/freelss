@@ -27,7 +27,7 @@
 #define MMAL_CAMERA_VIDEO_PORT 1
 
 #define MMAL_CAMERA_CAPTURE_PORT 2
-#define VIDEO_OUTPUT_BUFFERS_NUM 3
+#define VIDEO_OUTPUT_BUFFERS_NUM 4
 
 #define STILLS_FRAME_RATE_NUM 0
 #define STILLS_FRAME_RATE_DEN 1
@@ -38,7 +38,7 @@
 #define FULL_FOV_PREVIEW_4x3_X 1296
 #define FULL_FOV_PREVIEW_4x3_Y 972
 
-#define NUM_IMAGE_BUFFERS 3 // The number of images available for acquisition before calling release
+#define NUM_IMAGE_BUFFERS 4 // The number of images available for acquisition before calling release
 
 namespace freelss
 {
