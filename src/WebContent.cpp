@@ -254,6 +254,8 @@ const std::string WebContent::LIGHTING_TYPE = "LIGHTING_TYPE";
 const std::string WebContent::LIGHTING_PIN = "LIGHTING_PIN";
 const std::string WebContent::LIGHTING_ILLUMINATION_RGB = "LIGHTING_ILLUMINATION_RGB";
 const std::string WebContent::LIGHTING_LASER_RGB = "LIGHTING_LASER_RGB";
+const std::string WebContent::LIGHTING_NETWORK_INDICATION = "LIGHTING_NETWORK_INDICATION";
+const std::string WebContent::LIGHTING_NETWORK_INTERFACE = "LIGHTING_NETWORK_INTERFACE";
 const std::string WebContent::CREATE_BASE_FOR_OBJECT = "CREATE_BASE_FOR_OBJECT";
 const std::string WebContent::WIFI_ESSID = "WIFI_ESSID";
 const std::string WebContent::WIFI_ESSID_HIDDEN = "WIFI_ESSID_HIDDEN";
@@ -880,6 +882,36 @@ std::string WebContent::setup(const std::string& message)
 	sstr << setting(WebContent::LIGHTING_PIN, "Lighting Pin", setup->lightingPin, LIGHTING_PIN_DESCR);
 	sstr << setting(WebContent::LIGHTING_ILLUMINATION_RGB, "Lighting Illumination RGB", setup->lightingIlluminationRGB, LIGHTING_ILLUMINATION_RGB_DESCR);
 	sstr << setting(WebContent::LIGHTING_LASER_RGB, "Lighting Laser RGB", setup->lightingLaserRGB, LIGHTING_LASER_RGB_DESCR);
+
+	std::string offSel = setup->lightingNetworkIndication == LN_OFF ? " SELECTED" : "";
+	std::string fullSel = setup->lightingNetworkIndication == LN_FULL ? " SELECTED" : "";
+	std::string lastSel = setup->lightingNetworkIndication == LN_LAST ? " SELECTED" : "";
+
+	sstr << "<div><div class=\"settingsText\">Lighting Network IP Indication</div>";
+	sstr << "<select name=\"" << WebContent::LIGHTING_NETWORK_INDICATION << "\">";
+	sstr << "<option value=\"1\"" << offSel << ">Off</option>\r\n";
+	sstr << "<option value=\"2\"" << fullSel << ">Full</option>\r\n";
+	sstr << "<option value=\"3\"" << lastSel << ">Last</option>\r\n";
+	sstr << "</select></div>";
+	sstr << "<div class=\"settingsDescr\">Indicates the IP address by an LED count or flashing the lighting when freelss is started.  Full is the full ip address, Last is the last number of the address.</div>\n";
+
+        WifiConfig * wifi = WifiConfig::get();
+        std::vector<std::string> interfaces = wifi->getAllInterfaces();
+
+	sstr << "<div><div class=\"settingsText\">Lighting Network Interface</div>";
+	sstr << "<select name=\"" << WebContent::LIGHTING_NETWORK_INTERFACE << "\">";
+	for (size_t iNt = 0; iNt < interfaces.size(); iNt++)
+	{
+		std::string selected;
+		std::string interface = interfaces[iNt];
+		if (interface != "lo")
+		{
+			selected = (interface == setup->lightingNetworkInterface) ? " SELECTED" : "";
+			sstr << "<option value=\"" << interface << "\"" << selected << ">" << interface << "</option>\r\n";
+		}
+	}
+	sstr << "</select></div>";
+	sstr << "<div class=\"settingsDescr\">The interface to be indicated.</div>\n";
 
 	sstr << setting(WebContent::VERSION_NAME, "Firmware Version", FREELSS_VERSION_NAME, "The version of FreeLSS the scanner is running", "", true);
 	sstr << setting(WebContent::FREE_DISK_SPACE, "Free Space", freeSpaceMb, "The amount of free disk space available", "MB", true);

@@ -19,6 +19,8 @@
 */
 #include "Main.h"
 #include "WifiConfig.h"
+#include "Setup.h"
+#include "Lighting.h"
 
 namespace freelss
 {
@@ -247,6 +249,40 @@ std::string WifiConfig::getIpAddress(const std::string& interface)
 	}
 
 	return address;
+}
+
+void WifiConfig::displayNetworkIpAddress(void)
+{
+	Setup * setup = Setup::get();
+	Lighting * lighting = Lighting::get();
+
+	if ( setup->lightingNetworkIndication == LN_OFF )	return;
+
+	std::string ipAddress = getIpAddress(setup->lightingNetworkInterface);
+
+	std::cout << "displayNetworkIpAddress: " << setup->lightingNetworkInterface << ": " << ipAddress << std::endl;
+
+	// Seperate into numbers by .
+	int ind = 1;
+	char sep = '.';
+	for(size_t p=0, q=0; p!=ipAddress.npos; p=q)
+	{
+		std::string vStr = ipAddress.substr(p+(p!=0), (q=ipAddress.find(sep, p+1))-p-(p!=0));
+
+		//std::cout << vStr << std::endl;
+
+		if ( setup->lightingNetworkIndication == LN_FULL || (setup->lightingNetworkIndication == LN_LAST && ind == 4) )
+		{
+			for ( size_t i = 0; i < vStr.length(); i ++ )
+			{
+				int v = vStr[i] - '0';
+				//std::cout << "part: " << v << std::endl;
+				lighting->setCount(v);
+			}
+			if ( ind != 4 ) sleep(4);
+		}
+		ind ++;
+	}
 }
 
 void WifiConfig::connect(const std::string& essid, const std::string& password)

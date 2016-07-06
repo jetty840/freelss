@@ -389,7 +389,7 @@ static bool is_hex_string(std::string& str)
 
 
 
-static void SaveSetup(RequestInfo * reqInfo)
+static void SaveSetup(RequestInfo * reqInfo, bool saveEnableLighting)
 {
 	Setup * setup = Setup::get();
 
@@ -526,12 +526,10 @@ static void SaveSetup(RequestInfo * reqInfo)
 		setup->serialNumber = serialNumber;
 	}
 
-	std::string lightingEnable = reqInfo->arguments[WebContent::ENABLE_LIGHTING];
-	if (!lightingEnable.empty())
+	if ( saveEnableLighting )
 	{
-		std::cout << "Set Lighting Enable: " << lightingEnable << std::endl;
+		std::string lightingEnable = reqInfo->arguments[WebContent::ENABLE_LIGHTING];
 		setup->enableLighting = ToBool(lightingEnable);
-		std::cout << "Set Lighting Enable: " << setup->enableLighting << std::endl;
 	}
 
 	std::string lightingType = reqInfo->arguments[WebContent::LIGHTING_TYPE];
@@ -573,6 +571,18 @@ static void SaveSetup(RequestInfo * reqInfo)
 		}
 
 		setup->lightingLaserRGB = ToUInt32(lightingLaserRGB);
+	}
+
+	std::string lightingNetworkIndication = reqInfo->arguments[WebContent::LIGHTING_NETWORK_INDICATION];
+	if (!lightingNetworkIndication.empty())
+	{
+		setup->lightingNetworkIndication = (LightingNetworkIndicationType) ToInt(lightingNetworkIndication);
+	}
+
+	std::string lightingNetworkInterface = reqInfo->arguments[WebContent::LIGHTING_NETWORK_INTERFACE];
+	if (!lightingNetworkInterface.empty())
+	{
+		setup->lightingNetworkInterface = lightingNetworkInterface;
 	}
 
 	// Save the properties
@@ -941,7 +951,7 @@ static std::string AutocorrectLaserMisalignment(RequestInfo * reqInfo)
 		setup->rightLaserCalibrationTop.y = rightTop.y / camera->getImageHeight();
 		setup->rightLaserCalibrationBottom.x = rightBottom.x / camera->getImageWidth();
 		setup->rightLaserCalibrationBottom.y = rightBottom.y / camera->getImageHeight();
-		SaveSetup(reqInfo);
+		SaveSetup(reqInfo, 0);
 
 		message = "Successfully auto-corrected laser alignment";
 	}
@@ -1099,7 +1109,7 @@ static int ProcessPageRequest(RequestInfo * reqInfo)
 
 			if (reqInfo->method == RequestInfo::POST && cmd == "save")
 			{
-				SaveSetup(reqInfo);
+				SaveSetup(reqInfo, 1);
 				reqInfo->server->reinitialize();
 				message = "Hardware setup saved.";
 			}

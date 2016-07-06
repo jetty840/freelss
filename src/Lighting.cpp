@@ -188,9 +188,12 @@ void Lighting::setCount(int count)
 		if ( setup->lightingType == LT_WS281X )
 		{
 			for (int i = 0; i < WS281X_LED_COUNT; i ++)
-				setRGBLed((i < count) ? 0x00FFFFFF : 0, i);
+				setRGBLed((i < count) ? 0x00222222 : 0, i);
 			ws2811_render(&ledstring);
 			ws2811_wait(&ledstring);
+			sleep(2);
+			setPreset(Lighting::LP_OFF);
+			sleep(1);
 		}
 		if ( setup->lightingType == LT_PWM )
 		{

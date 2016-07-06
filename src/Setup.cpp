@@ -64,6 +64,8 @@ Setup::Setup() :
 	lightingPin(3),
 	lightingIlluminationRGB(0xFFFFFF),
 	lightingLaserRGB(0x222222),
+	lightingNetworkIndication(LN_OFF),
+	lightingNetworkInterface("eth0"),
 	enableAuthentication(false),
 	passwordHash("")
 {
@@ -122,6 +124,8 @@ void Setup::encodeProperties(std::vector<Property>& properties)
 	properties.push_back(Property("setup.lightingPin", ToString(lightingPin)));
 	properties.push_back(Property("setup.lightingIlluminationRGB", ToString(lightingIlluminationRGB)));
 	properties.push_back(Property("setup.lightingLaserRGB", ToString(lightingLaserRGB)));
+	properties.push_back(Property("setup.lightingNetworkIndication", ToString((int)lightingNetworkIndication)));
+	properties.push_back(Property("setup.lightingNetworkInterface", lightingNetworkInterface));
 	properties.push_back(Property("setup.enableAuthentication", ToString(enableAuthentication)));
 	properties.push_back(Property("setup.passwordHash", passwordHash));
 
@@ -323,6 +327,14 @@ void Setup::decodeProperties(const std::vector<Property>& properties)
 		else if (prop.name == "setup.lightingLaserRGB")
 		{
 			lightingLaserRGB = ToUInt32(prop.value);
+		}
+		else if (prop.name == "setup.lightingNetworkIndication")
+		{
+			lightingNetworkIndication = (LightingNetworkIndicationType) ToInt(prop.value);
+		}
+		else if (prop.name == "setup.lightingNetworkInterface")
+		{
+			lightingNetworkInterface = prop.value;
 		}
 		else if (prop.name == "setup.enableAuthentication")
 		{

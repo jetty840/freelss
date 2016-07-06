@@ -71,6 +71,9 @@ public:
 	/** Returns the IP address of the interface or empty string if it has none */
 	std::string getIpAddress(const std::string& interface);
 
+	/** Displays the IP address of the active interface via the lighting */
+	void displayNetworkIpAddress(void);
+
 	/** Finds all of the access points in range */
 	void scan();
 

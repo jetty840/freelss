@@ -141,6 +141,8 @@ int main(int argc, char **argv)
 		// Initialize the singletons
 		InitSingletons singletons;
 
+		freelss::WifiConfig::get()->displayNetworkIpAddress();
+
 		int port = freelss::Setup::get()->httpPort;
 
 		std::cout << "Running on port " << port << "..." << std::endl;

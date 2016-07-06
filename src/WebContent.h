@@ -92,6 +92,8 @@ public:
 	static const std::string LIGHTING_PIN;
 	static const std::string LIGHTING_ILLUMINATION_RGB;
 	static const std::string LIGHTING_LASER_RGB;
+	static const std::string LIGHTING_NETWORK_INDICATION;
+	static const std::string LIGHTING_NETWORK_INTERFACE;
 	static const std::string CREATE_BASE_FOR_OBJECT;
 	static const std::string WIFI_ESSID;
 	static const std::string WIFI_ESSID_HIDDEN;

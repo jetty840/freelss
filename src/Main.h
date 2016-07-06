@@ -292,6 +292,9 @@ enum UnitOfLength { UL_UNKNOWN, UL_MILLIMETERS, UL_INCHES, UL_CENTIMETERS };
 /** Lighting Types */
 enum LightingType { LT_UNKNOWN, LT_PWM, LT_WS281X };
 
+/** Lighting Network Indication Types */
+enum LightingNetworkIndicationType { LN_UNKNOWN, LN_OFF, LN_FULL, LN_LAST };
+
 /** Returns the current point in time in ms */
 double GetTimeInSeconds();
 

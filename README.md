@@ -86,3 +86,19 @@ The following command automatically starts FreeLSS everytime the Raspberry Pi is
 ```
 $ make startup
 ```
+
+###Pin Configuraton
+For FreeLSS running with the provided schematic/PCB in this fork, configuration for this board is as follows:
+```
+Right Laser Pin: 4
+Left Laser Pin: 0
+Laser On Value: 1
+Motor Enable Pin: 5
+Motor Step Pin: 2
+Motor Step Delay: 5000
+Motor Direction Pin: 3
+Motor Response Delay: 2
+Enable Lighting: Checked
+Light Type: WS281x
+Lighting Pin: 18
+```

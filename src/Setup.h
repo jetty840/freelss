@@ -68,6 +68,8 @@ public:
 	int lightingPin;
 	uint32_t lightingIlluminationRGB;
 	uint32_t lightingLaserRGB;
+	LightingNetworkIndicationType lightingNetworkIndication;
+	std::string lightingNetworkInterface;
 	bool enableAuthentication;
 	std::string passwordHash;
 private:
